@@ -1,3 +1,9 @@
+<script setup>
+import { useAuthStore } from '../stores/auth.js'
+
+const store = useAuthStore()
+</script>
+
 <template>
   <header class="header">
     <RouterLink to="/" class="logo" aria-label="Rêves de rue, accueil">
@@ -8,11 +14,17 @@
     <nav class="sections">
       <RouterLink to="/programmation">Programme</RouterLink>
       <a href="#">Infos pratiques</a>
-      <a href="#">Favoris</a>
+      <RouterLink v-if="!store.estArtiste" to="/favoris">Favoris</RouterLink>
       <a href="#">Association</a>
+      <RouterLink v-if="store.estAdmin" to="/admin/evenements">Administration</RouterLink>
+      <span v-if="store.connecte" class="compte">
+        <span>Bonjour {{ store.utilisateur.user_metadata?.nom ?? store.utilisateur.email }}</span>
+        <button type="button" @click="store.deconnexion">Déconnexion</button>
+      </span>
+      <RouterLink v-else to="/connexion">Connexion</RouterLink>
     </nav>
 
-    <a href="#" class="bouton bouton-primaire">Billetterie</a>
+    <RouterLink to="/billetterie" class="bouton bouton-primaire">Billetterie</RouterLink>
   </header>
 </template>
 
@@ -73,6 +85,28 @@
   color: var(--color-libelle-text-active);
   border-radius: var(--radius-200) var(--radius-200) 0 0;
   border-bottom-color: var(--color-libelle-text-border);
+}
+.compte {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-200);
+  font-family: var(--font-family-headings);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-heading-3);
+  color: var(--color-libelle-text-border);
+  padding: var(--spacing-200) 10px;
+}
+.compte button {
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 0;
+}
+.compte button:hover {
+  text-decoration: underline;
 }
 
 @media (max-width: 900px) {

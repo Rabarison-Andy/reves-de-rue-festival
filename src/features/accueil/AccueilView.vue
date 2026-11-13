@@ -18,7 +18,7 @@ const store = useEvenementsStore()
         </p>
         <div class="hero-boutons">
           <RouterLink to="/programmation" class="bouton bouton-hero">Découvrir le programme</RouterLink>
-          <a href="#" class="bouton bouton-hero">Billetterie</a>
+          <RouterLink to="/billetterie" class="bouton bouton-hero">Billetterie</RouterLink>
         </div>
       </div>
     </section>

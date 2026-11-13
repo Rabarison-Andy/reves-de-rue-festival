@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+import { createPinia } from 'pinia'
 import { mount } from '@vue/test-utils'
 import EventCard from './EventCard.vue'
 
@@ -25,6 +26,7 @@ describe('EventCard', () => {
         evenement,
       },
       global: {
+        plugins: [createPinia()],
         stubs: { RouterLink: { template: '<a><slot /></a>' } },
       },
     })
@@ -43,6 +45,7 @@ describe('EventCard', () => {
         evenement,
       },
       global: {
+        plugins: [createPinia()],
         stubs: { RouterLink: { template: '<a><slot /></a>' } },
       },
     })

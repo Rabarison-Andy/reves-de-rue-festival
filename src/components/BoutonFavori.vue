@@ -1,7 +1,12 @@
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
+import { useFavorisStore } from '../stores/favoris.js'
 
-defineProps({
+const props = defineProps({
+  id: {
+    type: [Number, String],
+    required: true,
+  },
   taille: {
     type: Number,
     default: 26,
@@ -12,10 +17,13 @@ defineProps({
   },
 })
 
-const favori = ref(false)
+const store = useFavorisStore()
+
+const favori = computed(() => store.estFavori(props.id))
+const enCours = computed(() => store.estEnCours(props.id))
 
 function clic() {
-  favori.value = !favori.value
+  store.basculer(props.id)
 }
 </script>
 
@@ -25,6 +33,7 @@ function clic() {
     :class="{ 'etoile-claire': clair, 'etoile-active': favori }"
     :aria-label="favori ? 'Retirer des favoris' : 'Ajouter aux favoris'"
     :aria-pressed="favori"
+    :disabled="enCours"
     @click.prevent.stop="clic"
   >
     <svg :width="taille" :height="taille" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">

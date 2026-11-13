@@ -1,11 +1,14 @@
 <script setup>
 import EventCard from '../../components/EventCard.vue'
-import EventFilters from './EventFilters.vue'
-import ChoixVue from './ChoixVue.vue'
+import EventFilters from '../../components/EventFilters.vue'
+import ChoixVue from '../../components/ChoixVue.vue'
 import { useEvenementsStore } from '../../stores/evenements.js'
+import { useFiltresEvenements } from '../../composables/useFiltresEvenements.js'
 import { formaterDateLongue } from '../../helpers.js'
 
 const store = useEvenementsStore()
+
+const { filtres, vue, changerFiltre, dates, evenementsFiltres, evenementsParJour } = useFiltresEvenements(() => store.evenementsTries)
 </script>
 
 <template>
@@ -15,18 +18,18 @@ const store = useEvenementsStore()
       <p>Retrouvez tous les événements du festival, jour par jour.</p>
     </section>
 
-    <EventFilters :filtres="store.filtres" :dates="store.dates" @changer="store.changerFiltre" />
+    <EventFilters :filtres="filtres" :dates="dates" @changer="changerFiltre" />
 
     <div class="barre">
-      <ChoixVue v-model="store.vue" />
+      <ChoixVue v-model="vue" />
     </div>
 
-    <div v-if="store.vue === 'liste'" class="liste">
-      <EventCard v-for="evenement in store.evenementsFiltres" :key="evenement.id" :evenement="evenement" />
+    <div v-if="vue === 'liste'" class="liste">
+      <EventCard v-for="evenement in evenementsFiltres" :key="evenement.id" :evenement="evenement" />
     </div>
 
     <div v-else>
-      <section v-for="groupe in store.evenementsParJour" :key="groupe.date" class="jour">
+      <section v-for="groupe in evenementsParJour" :key="groupe.date" class="jour">
         <h2 class="pastille-jour">{{ formaterDateLongue(groupe.date) }}</h2>
         <div class="frise">
           <div v-for="evenement in groupe.evenements" :key="evenement.id" class="frise-element">
@@ -40,21 +43,6 @@ const store = useEvenementsStore()
 </template>
 
 <style scoped>
-.entete {
-  padding: var(--spacing-1000) 0 var(--spacing-800);
-}
-h1 {
-  font-size: var(--font-size-heading-1);
-  line-height: var(--line-height-heading-1);
-  font-weight: var(--font-weight-bold);
-  margin: 0 0 10px;
-}
-.entete p {
-  font-size: var(--font-size-large);
-  line-height: var(--line-height-large);
-  margin: 0;
-}
-
 .barre {
   display: flex;
   justify-content: flex-end;

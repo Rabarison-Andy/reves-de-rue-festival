@@ -1,21 +1,82 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
-import evenementsJson from '../data/evenements.json'
-import artistesJson from '../data/artistes.json'
+import { supabase } from '../lib/supabaseClient'
 import festivalJson from '../data/festival.json'
 
 export const useEvenementsStore = defineStore('evenements', () => {
   const festival = ref(festivalJson)
-  const evenements = ref(evenementsJson)
-  const artistes = ref(artistesJson)
+  const evenements = ref([])
+  const artistes = ref([])
+  const partenaires = ref([])
+  const chargement = ref(true)
+  const erreur = ref(null)
 
-  const filtres = ref({
-    date: '',
-    recherche: '',
-  })
+  let promesseChargement = null
 
-  const vue = ref('liste')
+  function charger() {
+    if (!promesseChargement) {
+      promesseChargement = chargerDonnees()
+    }
+    return promesseChargement
+  }
+
+  async function chargerDonnees() {
+    chargement.value = true
+    erreur.value = null
+
+    try {
+      const [evenementsReponse, artistesReponse, sponsorsReponse] = await Promise.all([
+        supabase
+          .from('evenement')
+          .select('id_evenement, titre, description, heure_debut, date_debut, zone, image, phare, categorie(libelle), scene(nom), participation(id_artiste)'),
+        supabase.from('artiste').select('id_artiste, nom, genre, biographie, site_web'),
+        supabase.from('sponsor').select('nom, logo'),
+      ])
+
+      if (evenementsReponse.error) {
+        throw evenementsReponse.error
+      }
+      if (artistesReponse.error) {
+        throw artistesReponse.error
+      }
+      if (sponsorsReponse.error) {
+        throw sponsorsReponse.error
+      }
+
+      evenements.value = evenementsReponse.data.map((e) => ({
+        id: e.id_evenement,
+        titre: e.titre,
+        description: e.description,
+        heureDebut: e.heure_debut,
+        date: e.date_debut,
+        zone: e.zone,
+        image: e.image,
+        phare: e.phare,
+        type: e.categorie ? e.categorie.libelle : '',
+        lieu: e.scene ? e.scene.nom : '',
+        artistes: e.participation.map((p) => p.id_artiste),
+      }))
+
+      artistes.value = artistesReponse.data.map((a) => ({
+        id: a.id_artiste,
+        nom: a.nom,
+        discipline: a.genre,
+        bio: a.biographie,
+        siteWeb: a.site_web,
+      }))
+
+      partenaires.value = sponsorsReponse.data.map((s) => ({
+        nom: s.nom,
+        logo: s.logo ? supabase.storage.from('Sponsor').getPublicUrl(s.logo).data.publicUrl : null,
+      }))
+    } catch (e) {
+      console.error('Erreur de chargement des données Supabase :', e.message)
+      erreur.value = "Impossible de charger les données du festival. Réessaie dans un instant."
+    } finally {
+      chargement.value = false
+    }
+  }
 
   const evenementsTries = computed(() => {
     return [...evenements.value].sort((a, b) => {
@@ -29,54 +90,8 @@ export const useEvenementsStore = defineStore('evenements', () => {
     return evenementsTries.value.filter((e) => e.phare === true)
   })
 
-  const dates = computed(() => {
-    const liste = []
-    for (let i = 0; i < evenementsTries.value.length; i++) {
-      const d = evenementsTries.value[i].date
-      if (!liste.includes(d)) {
-        liste.push(d)
-      }
-    }
-    return liste
-  })
-
   function artistesDe(evenement) {
     return artistes.value.filter((a) => evenement.artistes.includes(a.id))
-  }
-
-  const evenementsFiltres = computed(() => {
-    let resultat = evenementsTries.value
-
-    if (filtres.value.date !== '') {
-      resultat = resultat.filter((e) => e.date === filtres.value.date)
-    }
-    if (filtres.value.recherche !== '') {
-      const mot = filtres.value.recherche.toLowerCase()
-      resultat = resultat.filter((e) => {
-        const noms = artistesDe(e).map((a) => a.nom).join(' ')
-        const texte = (e.titre + ' ' + e.type + ' ' + e.lieu + ' ' + noms).toLowerCase()
-        return texte.includes(mot)
-      })
-    }
-    return resultat
-  })
-
-  const evenementsParJour = computed(() => {
-    const groupes = []
-    for (let i = 0; i < evenementsFiltres.value.length; i++) {
-      const e = evenementsFiltres.value[i]
-      let groupe = groupes.find((g) => g.date === e.date)
-      if (!groupe) {
-        groupe = { date: e.date, evenements: [] }
-        groupes.push(groupe)
-      }
-      groupe.evenements.push(e)
-    }
-    return groupes
-  })
-
-  function changerFiltre(nom, valeur) {
-    filtres.value[nom] = valeur
   }
 
   function trouverEvenement(id) {
@@ -92,15 +107,14 @@ export const useEvenementsStore = defineStore('evenements', () => {
 
   return {
     festival,
-    filtres,
-    vue,
+    partenaires,
+    chargement,
+    erreur,
+    evenementsTries,
     evenementsPhares,
-    dates,
-    evenementsFiltres,
-    evenementsParJour,
-    changerFiltre,
     trouverEvenement,
     artistesDe,
     suggestionsPour,
+    charger,
   }
 })

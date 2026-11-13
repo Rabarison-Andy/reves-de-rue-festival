@@ -51,7 +51,7 @@ const suggestions = computed(() => store.suggestionsPour(evenement.value))
                 <p class="categorie-type">{{ evenement.type }}</p>
                 <p v-if="evenement.zone">{{ evenement.zone }}</p>
               </div>
-              <BoutonFavori :taille="32" />
+              <BoutonFavori :id="evenement.id" :taille="32" />
             </div>
 
             <div class="titre-date">

@@ -42,3 +42,18 @@ input:focus-visible {
   outline: var(--border-width-125) solid var(--pinky-400);
   outline-offset: var(--spacing-050);
 }
+
+.entete {
+  padding: var(--spacing-1000) 0 var(--spacing-800);
+}
+.entete h1 {
+  font-size: var(--font-size-heading-1);
+  line-height: var(--line-height-heading-1);
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 10px;
+}
+.entete p {
+  font-size: var(--font-size-large);
+  line-height: var(--line-height-large);
+  margin: 0;
+}

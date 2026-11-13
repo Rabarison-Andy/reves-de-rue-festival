@@ -1,18 +1,24 @@
 <script setup>
-defineProps({
+const props = defineProps({
   type: String,
 })
+
+const variantes = ['tag-a', 'tag-b', 'tag-c']
+
+function variante(type) {
+  if (!type) {
+    return variantes[0]
+  }
+  let total = 0
+  for (let i = 0; i < type.length; i++) {
+    total += type.codePointAt(i)
+  }
+  return variantes[total % variantes.length]
+}
 </script>
 
 <template>
-  <span
-    class="tag"
-    :class="{
-      'tag-fresque': type === 'fresque live',
-      'tag-performance': type === 'performance',
-      'tag-atelier': type === 'atelier participatif',
-    }"
-  >
+  <span class="tag" :class="variante(props.type)">
     {{ type }}
   </span>
 </template>
@@ -30,17 +36,17 @@ defineProps({
 .tag::first-letter {
   text-transform: uppercase;
 }
-.tag-fresque {
+.tag-a {
   background: var(--color-tag-type-a-bg);
   border-color: var(--color-tag-type-a-border);
   color: var(--color-tag-type-a-text);
 }
-.tag-atelier {
+.tag-b {
   background: var(--color-tag-type-b-bg);
   border-color: var(--color-tag-type-b-border);
   color: var(--color-tag-type-b-text);
 }
-.tag-performance {
+.tag-c {
   background: var(--color-tag-type-c-bg);
   border-color: var(--color-tag-type-c-border);
   color: var(--color-tag-type-c-text);

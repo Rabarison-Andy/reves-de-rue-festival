@@ -40,7 +40,7 @@ const date = jourEtMois(props.evenement.date)
         {{ formaterHeure(evenement.heureDebut) }}
       </p>
       <div class="favori">
-        <BoutonFavori :taille="22" />
+        <BoutonFavori :id="evenement.id" :taille="22" />
       </div>
     </div>
   </RouterLink>

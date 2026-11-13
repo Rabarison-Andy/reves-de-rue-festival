@@ -48,7 +48,7 @@ const date = jourEtMois(props.evenement.date)
       <svg class="chevron" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <path d="m9 18 6-6-6-6" />
       </svg>
-      <BoutonFavori />
+      <BoutonFavori :id="evenement.id" />
     </div>
   </RouterLink>
 </template>

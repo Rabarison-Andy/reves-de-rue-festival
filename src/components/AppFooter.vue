@@ -7,7 +7,7 @@ const store = useEvenementsStore()
 <template>
   <footer>
     <div class="partenaires">
-      <template v-for="partenaire in store.festival.partenaires" :key="partenaire.nom">
+      <template v-for="partenaire in store.partenaires" :key="partenaire.nom">
         <img v-if="partenaire.logo" :src="partenaire.logo" :alt="partenaire.nom" />
         <span v-else class="partenaire-nom">{{ partenaire.nom }}</span>
       </template>
